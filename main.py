@@ -29,9 +29,11 @@ class FilterthinktagsPlugin(Star):
 
                 # 根据标签列表动态过滤标签
                 if tags_to_filter:
-                    tag_group = '|'.join(re.escape(tag) for tag in tags_to_filter)
-                    pattern = rf'<({tag_group})>.*?</\1>\s*'
-                    new_text = re.sub(pattern, '', new_text, flags=re.DOTALL)
+                    for tag in tags_to_filter:
+                        escaped_tag = re.escape(tag)
+                        # 逐个标签处理，使用贪婪匹配确保匹配完整的外层标签对
+                        pattern = rf'<{escaped_tag}>.*</{escaped_tag}>\s*'
+                        new_text = re.sub(pattern, '', new_text, flags=re.DOTALL)
 
                 # 过滤无标签的、可能跨行的文本块
                 if prefixes_to_filter:
@@ -39,6 +41,9 @@ class FilterthinktagsPlugin(Star):
                         pattern = rf'^{re.escape(prefix)}.*?(\n\n|\Z)'
                         # 使用 re.DOTALL (让.匹配换行符) 和 re.MULTILINE (让^匹配每行开头)
                         new_text = re.sub(pattern, '', new_text, flags=re.DOTALL | re.MULTILINE)
+                
+                # 最终文本清理：合并多个连续换行符为单个换行符
+                new_text = re.sub(r'\n\s*\n+', '\n', new_text)
                 
                 # 清理文本两端的空白字符
                 stripped_text = new_text.strip()
