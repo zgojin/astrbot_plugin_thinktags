@@ -40,6 +40,9 @@ class FilterthinktagsPlugin(Star):
                         # 使用 re.DOTALL (让.匹配换行符) 和 re.MULTILINE (让^匹配每行开头)
                         new_text = re.sub(pattern, '', new_text, flags=re.DOTALL | re.MULTILINE)
                 
+                # 最终文本清理：合并多个连续换行符为单个换行符
+                new_text = re.sub(r'\n\s*\n+', '\n', new_text)
+                
                 # 清理文本两端的空白字符
                 stripped_text = new_text.strip()
                 # 只有当处理后的文本不为空时，才将其添加回新的消息链
